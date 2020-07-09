@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue3.0 Demo</title>
+</head>
+
+<body>
+    <div id="app"></div>
+</body>
+<script src="./vue.global.js"></script>
+<script type="text/javascript">
+    const arr = []
+    //Set a great number to make the data more accurate
+    //The number is greater, the gap is wider
+    for (let i = 0; i < 5000; i++) {
+      arr[i] = {
+        id: i,
+        price: i
+      }
+    }
+    const { createApp, reactive, ref, onUpdated } = Vue
+    const App = {
+        template: `
+        <div>
+            <h1>Time's cost in PatchKeyedChildren(with ReversePatch):</h1>
+            <p>Average time:{{averageTime}}ms</p>
+            <p>Fastest time:{{fastestTimeCost}}ms</p>
+            <p>Slowest time:{{slowestTimeCost}}ms</p>
+            <p>Run times:{{reverseTimes}}</p>
+            <i>you can click 'Start' to run your tests!</i>
+            <p><button @click='click'>Start</button></p>
+            <i>you can click 'Clear' and then click 'Start' to run your tests again!</i>
+            <p><button @click='clear'>Clear</button></p>
+            <table border="1">
+              <tr>
+                <th>ID</th>
+                <th style='width:80px'>
+                    Price
+                </th>
+              </tr>
+              <tr v-for="(item, index) in goodList" :key='item.id'>
+                <td>{{item.id}}</td>
+                <td>\${{item.price}}</td>
+              </tr>
+            </table>
+        </div>
+        `,
+        setup() {
+            const goodList = reactive(arr)
+            const averageTime = ref(window.averageTime ? window.averageTime : 0)
+            const fastestTimeCost = ref(window.fastestTime ? window.fastestTime : 0)
+            const slowestTimeCost = ref(window.slowestTime ? window.slowestTime : 0)
+            const reverseTimes = ref(0)
+            click = () => {
+                const id = window.setInterval(() => {
+                    //Run the test 60 times
+                    if (reverseTimes.value < 60) {
+                        goodList.reverse()
+                        reverseTimes.value++
+                    } else {
+                        window.clearInterval(id)
+                    }
+                },1000)
+            }
+            clear = () => {
+                window.averageTime = 0
+                window.fastestTime = 0
+                window.slowestTime = 0
+                reverseTimes.value = 0,
+                window.Count = 0,
+                window.totalTime = 0
+            }
+            onUpdated(() => {
+                averageTime.value = window.averageTime ? window.averageTime : 0
+                fastestTimeCost.value = window.fastestTime ? window.fastestTime : 0
+                slowestTimeCost.value = window.slowestTime ? window.slowestTime : 0
+            })
+            return {
+                goodList,
+                click,
+                averageTime,
+                reverseTimes,
+                fastestTimeCost,
+                slowestTimeCost,
+                clear
+            }
+        }
+    }
+    createApp(App).mount('#app')
+</script>
+
+</html>
